@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-import UnityView from 'react-native-unity-view';
+// import UnityView from '@azesmway/react-native-unity'; // Temporarily disabled - Unity framework not built yet
 import RNPickerSelect from 'react-native-picker-select';
 import {useNavigation} from '@react-navigation/native';
 import {UnityBridge} from '../services/UnityBridge';
@@ -24,10 +24,14 @@ const MainScreen = () => {
     // Initialize Unity bridge
     UnityBridge.initialize();
 
-    // Listen for messages from Unity
-    UnityBridge.onMessage((message: string) => {
-      handleUnityMessage(message);
-    });
+    // Listen for messages from Unity (only if eventEmitter is available)
+    try {
+      UnityBridge.onMessage((message: string) => {
+        handleUnityMessage(message);
+      });
+    } catch (error) {
+      console.warn('Could not set up Unity message listener:', error);
+    }
 
     // Request initial events
     UnityBridge.sendMessageToUnity('REQUEST_EVENTS|{}');
@@ -97,11 +101,15 @@ const MainScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* Unity 3D View - Top 70% */}
       <View style={styles.unityContainer}>
-        <UnityView
-          ref={unityRef}
-          style={styles.unityView}
-          onUnityMessage={handleUnityMessage}
-        />
+        {/* Unity temporarily disabled - framework not built yet */}
+        <View style={styles.unityPlaceholder}>
+          <Text style={styles.unityPlaceholderText}>
+            Unity 3D View{'\n'}
+            (Unity framework not built yet){'\n\n'}
+            Build Unity project and export framework{'\n'}
+            to enable 3D building visualization
+          </Text>
+        </View>
       </View>
 
       {/* React Native UI Panel - Bottom 30% */}
@@ -181,6 +189,22 @@ const styles = StyleSheet.create({
   },
   unityView: {
     flex: 1,
+  },
+  unityPlaceholder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+  },
+  unityPlaceholderText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+    opacity: 0.7,
   },
   uiPanel: {
     flex: 0.3, // 30% of screen

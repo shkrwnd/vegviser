@@ -4,7 +4,7 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 platform :ios, '13.4'
 install! 'cocoapods', :deterministic_uuids => false
 
-target 'Vegviser' do
+target 'VegviserTemp' do
   config = use_native_modules!
 
   use_react_native!(
@@ -12,9 +12,7 @@ target 'Vegviser' do
     :hermes_enabled => true
   )
 
-  pod 'react-native-unity-view', :path => '../node_modules/react-native-unity-view'
-
-  target 'VegviserTests' do
+  target 'VegviserTempTests' do
     inherit! :complete
   end
 
@@ -24,6 +22,18 @@ target 'Vegviser' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
+    
+    # Fix deployment target warnings
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 13.4
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.4'
+        end
+        # Fix C++ standard library for React Native 0.73
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+      end
+    end
   end
 end
 
